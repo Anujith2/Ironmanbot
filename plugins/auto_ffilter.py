@@ -46,7 +46,7 @@ async def auto_post_formatter(client, message):
         )
 
         # കസ്റ്റം സ്റ്റാർട്ട് ലിങ്ക് ഫോർമാറ്റ്
-        BOT_USERNAME = "Anujith2bot"
+        BOT_USERNAME = "Allutvbot"
         formatted_name_for_link = clean_name.replace(" ", "")
         bot_link = f"https://telegram.me/{BOT_USERNAME}?start=getfile-{formatted_name_for_link}-S{season}{episode_str}"
 
