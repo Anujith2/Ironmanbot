@@ -3,8 +3,8 @@ from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 # ഇവിടെ ചാനൽ ഐഡികൾ അല്ലെങ്കിൽ യൂസർനെയിമുകൾ നൽകുക (ഉദാഹരണത്തിന്: -100xxxxxxxxxx അല്ലെങ്കിൽ '@channel_username')
-CHANNELS = [-1001234567890]     # ഫയലുകൾ പരിശോധിക്കേണ്ട ചാനൽ ഐഡി
-AUTH_CHANNEL = -1001234567890   # പോസ്റ്റും ഫോട്ടോയും അയക്കേണ്ട ചാനൽ ഐഡി
+CHANNELS = [-1002015288592]     # ഫയലുകൾ പരിശോധിക്കേണ്ട ചാനൽ ഐഡി
+AUTH_CHANNEL = -1002110922261   # പോസ്റ്റും ഫോട്ടോയും അയക്കേണ്ട ചാനൽ ഐഡി
 
 # ഓട്ടോ പോസ്റ്റ് ഫോർമാറ്റർ കോഡ്
 @Client.on_message(filters.chat(CHANNELS) & (filters.document | filters.video))
