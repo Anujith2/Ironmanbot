@@ -70,7 +70,6 @@ SERIALS_MAPPING = {
     "mangalyam_thanthunanena": "Mangalyam Thanthunanena"
 }
 
-# Get File Links Dictionary (Allutvbot ആക്കി മാറ്റിയ ലിങ്കുകൾ)
 GET_FILE_LINKS_DICT = {
     "kanmashi": "https://telegram.me/Allutvbot?start=getfile-Kanmashi",
     "karnan": "https://telegram.me/Allutvbot?start=getfile-Karnan",
@@ -134,11 +133,10 @@ GET_FILE_LINKS_DICT = {
     "mangalyam_thanthunanena": "https://telegram.me/Allutvbot?start=getfile-Mangalyam-Thanthunanena"
 }
 
-# ഓട്ടോ പോസ്റ്റ് ഫോർമാറ്റർ കോഡ്
+# 1. ഓട്ടോ പോസ്റ്റ് ഫോർമാറ്റർ കോഡ് (ചാനലിൽ ഫയൽ വരുമ്പോൾ പോസ്റ്റ് ചെയ്യാൻ)
 @Client.on_message(filters.chat(CHANNELS) & (filters.document | filters.video))
 async def auto_post_formatter(client, message):
     try:
-        # ഫയലിന്റെ ഒറിജിനൽ പേര് സുരക്ഷിതമായി എടുക്കുന്നു
         if message.document:
             file_name_raw = message.document.file_name
         elif message.video:
@@ -146,41 +144,37 @@ async def auto_post_formatter(client, message):
         else:
             return
 
-        # ഫയൽ നാമത്തിലുള്ള എക്സ്റ്റൻഷൻ നീക്കം ചെയ്യുന്നു
         file_name_clean_ext = re.sub(r'\.(mkv|mp4|avi|mov)$', '', file_name_raw, flags=re.IGNORECASE)
         raw_lower = file_name_clean_ext.lower()
         
         matched_key = None
         matched_display_name = "Malayalam Serial"
 
-        # SERIALS_MAPPING-മായി ഫയൽ പേര് ഒത്തുനോക്കുന്നു
+        # സീരിയൽ മാപ്പിംഗിൽ ഉള്ളതുമായി ഒത്തുനോക്കുന്നു
         for key, display_name in SERIALS_MAPPING.items():
+            # ഉദാഹരണത്തിന് 'mazha_thorum_munpe' എന്നതിലെ വാക്കുകൾ ഫയൽ പേരിൽ ഉണ്ടോയെന്ന് നോക്കുന്നു
             key_words = key.split('_')
-            if all(word in raw_lower for word in key_words):
+            if all(re.search(r'\b' + re.escape(word) + r'\b', raw_lower) for word in key_words):
                 matched_key = key
                 matched_display_name = display_name
                 break
 
-        # മാപ്പിംഗിൽ കിട്ടിയില്ലെങ്കിൽ സാധാരണ രീതിയിൽ ക്ലീൻ ചെയ്യുന്നു
+        # മാപ്പിംഗിൽ കിട്ടിയില്ലെങ്കിൽ ഫയൽ പേര് ക്ലീൻ ചെയ്യുന്നു
         if not matched_key:
             clean_name = re.sub(r's\d+|season\s*\d+|e\d+|episode\s*\d+|\d{3,4}p|WEB|HDRip|H\.264|AAC', '', file_name_clean_ext, flags=re.IGNORECASE).strip()
             clean_name = clean_name.replace('.', ' ').replace('_', ' ').strip()
             matched_display_name = clean_name if clean_name else "Malayalam Serial"
             matched_key = re.sub(r'[^a-zA-Z0-9]', '_', matched_display_name).lower()
 
-        # Season കണ്ടെത്താൻ
         season_match = re.search(r'(?:s|season\s*)(\d+)', file_name_raw, re.IGNORECASE)
         season = season_match.group(1).zfill(2) if season_match else "01"
 
-        # Episode കണ്ടെത്താൻ
         episode_match = re.search(r'(?:e|episode\s*|\bep\s*)(\d+)', file_name_raw, re.IGNORECASE)
         episode_num = episode_match.group(1) if episode_match else "1"
 
-        # Quality കണ്ടെത്താൻ
         quality_match = re.search(r'(\d{3,4}p)', file_name_raw, re.IGNORECASE)
         quality = quality_match.group(1) if quality_match else "720p"
 
-        # ക്യാപ്ഷൻ ഫോർമാറ്റ്
         caption = (
             f"📁 **File Name :** {matched_display_name}\n"
             f"🎞️ **Season :** {season}\n"
@@ -188,7 +182,6 @@ async def auto_post_formatter(client, message):
             f"🎬 **Quality :** {quality}"
         )
 
-        # GET_FILE_LINKS_DICT-ൽ നിന്ന് link എടുക്കുന്നു
         bot_link = GET_FILE_LINKS_DICT.get(matched_key, f"https://telegram.me/Allutvbot?start=getfile-{matched_display_name.replace(' ', '-')}")
 
         reply_markup = InlineKeyboardMarkup(
@@ -197,7 +190,6 @@ async def auto_post_formatter(client, message):
 
         BANNER_PHOTO = "https://ibb.co/cS5zrTGD"
 
-        # അപ്ഡേറ്റ് ചാനലിലേക്ക് ഫോട്ടോയും ക്യാപ്ഷനും അയക്കുന്നു
         await client.send_photo(
             chat_id=AUTH_CHANNEL,
             photo=BANNER_PHOTO,
@@ -207,3 +199,36 @@ async def auto_post_formatter(client, message):
 
     except Exception as e:
         print(f"Auto-Formatter Error: {e}")
+
+
+# 2. ബോട്ട് വഴി ഗെറ്റ് ഫയൽ ലിങ്ക് അമർത്തുമ്പോഴോ /start കമാൻഡ് ഉപയോഗിക്കുമ്പോഴോ വർക്ക് ചെയ്യാനുള്ള കോഡ്
+@Client.on_message(filters.command("start") & filters.private)
+async def start_command_handler(client, message):
+    text = message.text
+    if len(text.split()) > 1:
+        payload = text.split()[1] # ഉദാഹരണത്തിന്: getfile-Mazha-Thorum-Munpe അല്ലെങ്കിൽ getfile_...
+        if "getfile" in payload:
+            serial_query = payload.replace("getfile-", "").replace("getfile_", "").replace("-", " ")
+            await message.reply_text(f"✨ ඔබ ඉල්ලಿದ സീരിയൽ: **{serial_query}**\n\nദയവായി കാത്തിരിക്കുക, ഫയൽ ഉടൻ ലഭ്യമാക്കുന്നതാണ്! 📥")
+            return
+            
+    await message.reply_text("👋 ഹലോ! Allu TV Serials বോട്ടിലേക്ക് സ്വാഗതം. ചാനലിൽ നിന്നും നിങ്ങൾക്ക് ആവശ്യമായ സീരിയൽ ഫയലുകൾ ഡൗൺലോഡ് ചെയ്യാവുന്നതാണ്.")
+
+
+# 3. ബോട്ടിലേക്ക് യൂസർ നേരിട്ട് ഷോയുടെ പേര്/ടെക്സ്റ്റ് അയക്കുമ്പോൾ സെർച്ച് ചെയ്ത് മറുപടി നൽകാനുള്ള ഹാൻഡ്‌ലർ
+@Client.on_message(filters.text & filters.private & ~filters.command(["start"]))
+async def search_serial_handler(client, message):
+    query = message.text.lower().strip()
+    found = False
+    
+    # മാപ്പിംഗിൽ യൂസർ ടൈപ് ചെയ്ത പേര് ഉണ്ടോയെന്ന് നോക്കുന്നു
+    for key, display_name in SERIALS_MAPPING.items():
+        if query in key or query in display_name.lower():
+            link = GET_FILE_LINKS_DICT.get(key, f"https://telegram.me/Allutvbot?start=getfile-{display_name.replace(' ', '-')}")
+            reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("📥 Get File", url=link)]])
+            await message.reply_text(f"📺 **{display_name}** സീരിയലിനായുള്ള ഫയൽ ലിങ്ക് താഴെ നൽകുന്നു:", reply_markup=reply_markup)
+            found = True
+            break
+            
+    if not found:
+        await message.reply_text("❌ മാപ്പ് ചെയ്യപ്പെട്ട സീരിയലുകൾക്കിടയിൽ ഈ പേരിൽ ഒന്നും കണ്ടെത്താനായില്ല. ദയവായി ശരിയായ പേര് നൽകുക.")
