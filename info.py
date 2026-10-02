@@ -89,7 +89,7 @@ CHAN_THREE = environ.get('CHAN_THREE', 'https://t.me/AlluTvSerials')
 CHAN_FOUR = environ.get('CHAN_FOUR', 'https://t.me/AlluTvSerials')
 MARVEL_CHAN = environ.get('MARVEL_CHAN', 'https://t.me/AlluTvSerials')
 MOVIE_CHAN = environ.get('MOVIE_CHAN', 'https://t.me/AllMalayalamSerials12')
-BOT_CHAN = environ.get('BOT_CHAN', 'https://t.me/marselbots')
+BOT_CHAN = environ.get('BOT_CHAN', 'https://t.me/Allutvbot')
 CHNL_LNK = environ.get('CHNL_LNK', 'https://t.me/AllMalayalamSupportGroup')
 
        
